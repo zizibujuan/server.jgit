@@ -30,6 +30,7 @@ public class GitInit {
 		// 配置仓库
 		config(git, gitUserName, gitUserMail);
 		git.commit().setMessage("第一次提交").call();
+		repository.close();
 	}
 	
 	private void config(Git git, String gitUserName, String gitUserMail) throws IOException{

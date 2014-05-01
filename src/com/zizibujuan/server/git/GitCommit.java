@@ -1,17 +1,15 @@
 package com.zizibujuan.server.git;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.StringReader;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.core.filesystem.EFS;
-import org.eclipse.core.filesystem.IFileStore;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.api.errors.NoFilepatternException;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
@@ -20,23 +18,31 @@ public class GitCommit {
 
 	public void execute(
 			String gitRootPath, 
-			String relativeFilePath,
+			String relativePath,
 			String fileName,
 			String fileContent, 
 			String authorName, 
 			String authorMail, 
-			String commitMessage) throws IOException, CoreException, URISyntaxException, NoFilepatternException, GitAPIException{
+			String commitMessage) throws IOException,  GitAPIException{
 		
 		Repository repo = FileRepositoryBuilder.create(new File(gitRootPath, Constants.DOT_GIT));
 		repo.resolve(Constants.HEAD);
 		Git git = new Git(repo);
 		
-		URI folder = new URI(gitRootPath + relativeFilePath);
-		IFileStore dirStore = EFS.getLocalFileSystem().getStore(folder);
-		IFileStore fileStore = dirStore.getChild(fileName);
-		IOUtils.write(fileContent, fileStore.openOutputStream(EFS.NONE, null));
+		File folder = new File(gitRootPath, relativePath);
+		if(!folder.exists()){
+			folder.mkdirs();
+		}
+		File file = new File(folder, fileName);
+		if(!file.exists()){
+			file.createNewFile();
+		}
+		OutputStream out = new FileOutputStream(file);
+		Reader reader = new StringReader(fileContent);
+		IOUtils.copy(reader, out);
 		
-		git.add().addFilepattern(relativeFilePath + fileName).call();
+		git.add().addFilepattern(file.getPath()).call();
 		git.commit().setAuthor(authorName, authorMail).setMessage(commitMessage).call();
+		repo.close();
 	}
 }
