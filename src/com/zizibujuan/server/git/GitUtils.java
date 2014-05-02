@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.LogCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -14,6 +13,7 @@ import org.eclipse.jgit.lib.RepositoryCache;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.util.FS;
+import org.eclipse.jgit.util.FileUtils;
 
 /**
  * git帮助类
@@ -88,6 +88,8 @@ public class GitUtils {
 	 */
 	public static void delete(String gitRepoPath) throws IOException {
 		File file = new File(gitRepoPath);
-		FileUtils.deleteDirectory(file);
+		//FileUtils.cleanDirectory(file);
+		// FIXME： 当git仓库中有文件时，提示不能删除，找到文件在哪里被锁住了。
+		FileUtils.delete(file, FileUtils.RECURSIVE);
 	}
 }
