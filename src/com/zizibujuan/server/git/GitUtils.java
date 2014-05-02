@@ -2,16 +2,9 @@ package com.zizibujuan.server.git;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.LogCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.RepositoryCache;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.FileUtils;
 
@@ -37,21 +30,9 @@ public class GitUtils {
 		return RepositoryCache.FileKey.isGitRepository(new File(file, Constants.DOT_GIT), FS.DETECTED);
 	}
 	
-	public static int getLogCount(String path) throws IOException, GitAPIException{
-		Repository repo = FileRepositoryBuilder.create(new File(path, Constants.DOT_GIT));
-		Git git = new Git(repo);
-		LogCommand logCommand = git.log();
-		logCommand.all();
-		Iterable<RevCommit> commits = logCommand.call();
-		Iterator<RevCommit> iterator = commits.iterator();
-		
-		int count = 0;
-		while(iterator.hasNext()){
-			count++;
-			iterator.next();
-		}
-		repo.close();
-		return count;
+	public static int getLogCount(String gitRepoPath){
+		GitLog gitLog = new GitLog();
+		return gitLog.getCount(gitRepoPath);
 	}
 
 	/**
@@ -60,10 +41,8 @@ public class GitUtils {
 	 * @param gitRepoPath 文件夹路径
 	 * @param gitUserName 用户名
 	 * @param gitUserMail 邮箱
-	 * @throws IOException 
-	 * @throws GitAPIException 
 	 */
-	public static void init(String gitRepoPath, String gitUserName, String gitUserMail) throws GitAPIException, IOException {
+	public static void init(String gitRepoPath, String gitUserName, String gitUserMail){
 		GitInit gitInit = new GitInit();
 		gitInit.execute(gitRepoPath, gitUserName, gitUserMail);
 	}
@@ -75,7 +54,7 @@ public class GitUtils {
 			String fileContent, 
 			String authorName, 
 			String authorMail, 
-			String commitMessage) throws IOException, GitAPIException{
+			String commitMessage){
 		GitCommit gitCommit = new GitCommit();
 		gitCommit.execute(gitRootPath, relativePath, fileName, fileContent, authorName, authorMail, commitMessage);
 	}
@@ -88,8 +67,6 @@ public class GitUtils {
 	 */
 	public static void delete(String gitRepoPath) throws IOException {
 		File file = new File(gitRepoPath);
-		//FileUtils.cleanDirectory(file);
-		// FIXME： 当git仓库中有文件时，提示不能删除，找到文件在哪里被锁住了。
 		FileUtils.delete(file, FileUtils.RECURSIVE);
 	}
 }

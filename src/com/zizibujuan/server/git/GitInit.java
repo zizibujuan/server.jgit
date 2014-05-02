@@ -10,27 +10,40 @@ import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
 
+import com.zizibujuan.server.git.exception.GitInitFailedException;
+import com.zizibujuan.server.git.exception.GitRepoNotFoundException;
+
 public class GitInit {
 
+	private static final String MSG_FIRST_COMMIT = "第一次提交";
+	
 	// 仓库地址
 	/**
 	 * 初始化git仓库
 	 * 
-	 * @param gitRootPath 仓库路径，绝对路径
-	 * @throws GitAPIException 
-	 * @throws IOException 
+	 * @param gitRepoPath 仓库路径，绝对路径
 	 */
-	public void execute(String gitRootPath, String gitUserName, String gitUserMail) throws GitAPIException, IOException{
+	public void execute(String gitRepoPath, String gitUserName, String gitUserMail){
 		InitCommand command = new InitCommand();
-		File directory = new File(gitRootPath);
+		File directory = new File(gitRepoPath);
 		command.setDirectory(directory);
 		
-		Repository repository = command.call().getRepository();
-		Git git = new Git(repository);
-		// 配置仓库
-		config(git, gitUserName, gitUserMail);
-		git.commit().setMessage("第一次提交").call();
-		repository.close();
+		Repository repository = null;
+		try {
+			repository = command.call().getRepository();
+			Git git = new Git(repository);
+			// 配置仓库
+			config(git, gitUserName, gitUserMail);
+			git.commit().setMessage(MSG_FIRST_COMMIT).call();
+		} catch (GitAPIException e) {
+			throw new GitInitFailedException(e);
+		} catch (IOException e) {
+			throw new GitRepoNotFoundException(gitRepoPath);
+		}finally{
+			if(repository != null){
+				repository.close();
+			}
+		}
 	}
 	
 	private void config(Git git, String gitUserName, String gitUserMail) throws IOException{
