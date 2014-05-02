@@ -9,11 +9,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.net.URISyntaxException;
 
 import org.apache.commons.io.IOUtils;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -43,7 +40,7 @@ public class GitUtilsTests {
 	
 	@Test
 	@Ignore
-	public void testInit() throws GitAPIException, IOException, URISyntaxException, CoreException{
+	public void testInit(){
 		assertFalse(GitUtils.isGitRepo(gitRepoPath));
 		GitUtils.init(gitRepoPath, gitUserName, gitUserMail);
 		assertTrue(GitUtils.isGitRepo(gitRepoPath));
