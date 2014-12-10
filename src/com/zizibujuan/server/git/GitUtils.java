@@ -58,6 +58,16 @@ public class GitUtils {
 		GitCommit gitCommit = new GitCommit();
 		gitCommit.execute(gitRootPath, relativePath, fileName, fileContent, authorName, authorMail, commitMessage);
 	}
+	
+	/**
+	 * git pull
+	 * 
+	 * @param gitRepoPath 仓库的根目录
+	 */
+	public static void pull(String gitRepoPath){
+		GitPull gitPull = new GitPull();
+		gitPull.execute(gitRepoPath);
+	}
 
 	/**
 	 * 删除git仓库
